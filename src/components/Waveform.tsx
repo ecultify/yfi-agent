@@ -7,30 +7,49 @@ interface WaveformProps {
 }
 
 export function Waveform({ isActive }: WaveformProps) {
-  const [points, setPoints] = React.useState<number[]>([]);
   const animationRef = React.useRef<number | undefined>(undefined);
   const phaseRef = React.useRef(0);
+  const currentAmplitudeRef = React.useRef(2);
+  const targetAmplitudeRef = React.useRef(2);
 
   React.useEffect(() => {
-    const numPoints = 60;
-    
+    const canvas = document.getElementById("waveform-canvas") as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerY = height / 2;
+
     const animate = () => {
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+
+      // Update target amplitude based on speaking state
       if (isActive) {
-        // Create smooth sine wave with multiple frequencies
-        const newPoints = Array.from({ length: numPoints }, (_, i) => {
-          const x = i / numPoints;
-          const wave1 = Math.sin(x * Math.PI * 4 + phaseRef.current) * 30;
-          const wave2 = Math.sin(x * Math.PI * 2 + phaseRef.current * 1.5) * 20;
-          const wave3 = Math.sin(x * Math.PI * 6 + phaseRef.current * 0.8) * 15;
-          return 50 + wave1 + wave2 + wave3;
-        });
-        setPoints(newPoints);
-        phaseRef.current += 0.15;
+        // Random modulation when speaking (like voice fluctuation)
+        if (Math.random() > 0.95) {
+          targetAmplitudeRef.current = 15 + Math.random() * 25;
+        }
       } else {
-        // Flat line when not speaking
-        setPoints(Array.from({ length: numPoints }, () => 50));
+        // Small breathing effect when idle
+        targetAmplitudeRef.current = 2;
       }
-      
+
+      // Smooth interpolation (lerping) toward target - 8% per frame
+      currentAmplitudeRef.current +=
+        (targetAmplitudeRef.current - currentAmplitudeRef.current) * 0.08;
+
+      // Draw three layered waves
+      drawWave(ctx, width, centerY, phaseRef.current * 0.5, currentAmplitudeRef.current * 0.6, "#9333ea", 3, 0.4); // Purple - Back layer
+      drawWave(ctx, width, centerY, phaseRef.current * 0.8, currentAmplitudeRef.current * 0.8, "#ec4899", 2.5, 0.6); // Pink - Middle layer
+      drawWave(ctx, width, centerY, phaseRef.current, currentAmplitudeRef.current, "#3b82f6", 3, 1); // Blue - Front layer
+
+      // Increment phase for animation
+      phaseRef.current += 0.05;
+
       animationRef.current = requestAnimationFrame(animate);
     };
 
@@ -43,56 +62,58 @@ export function Waveform({ isActive }: WaveformProps) {
     };
   }, [isActive]);
 
-  // Generate SVG path from points
-  const generatePath = () => {
-    if (points.length === 0) return "";
-    
-    const width = 600;
-    const height = 100;
-    const step = width / (points.length - 1);
-    
-    let path = `M 0,${points[0]}`;
-    
-    for (let i = 1; i < points.length; i++) {
+  // Function to draw a single wave layer
+  const drawWave = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    centerY: number,
+    phase: number,
+    amplitude: number,
+    color: string,
+    lineWidth: number,
+    opacity: number
+  ) => {
+    ctx.beginPath();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = opacity;
+
+    const points = 100;
+    const step = width / points;
+
+    for (let i = 0; i <= points; i++) {
       const x = i * step;
-      const y = points[i];
-      const prevX = (i - 1) * step;
-      const prevY = points[i - 1];
-      
-      // Create smooth curves using quadratic bezier
-      const cpX = prevX + step / 2;
-      const cpY = (prevY + y) / 2;
-      path += ` Q ${cpX},${cpY} ${x},${y}`;
+      const frequency1 = 0.02;
+      const frequency2 = 0.04;
+      const frequency3 = 0.01;
+
+      // Multiple sine waves combined for organic look
+      const y =
+        centerY +
+        Math.sin(x * frequency1 + phase) * amplitude +
+        Math.sin(x * frequency2 + phase * 1.5) * (amplitude * 0.5) +
+        Math.sin(x * frequency3 + phase * 0.8) * (amplitude * 0.3);
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
     }
-    
-    return path;
+
+    ctx.stroke();
+    ctx.globalAlpha = 1;
   };
 
   return (
-    <div className="w-full h-32 flex items-center justify-center">
-      <svg
-        width="600"
-        height="100"
-        viewBox="0 0 600 100"
-        className="w-full h-full"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="50%" stopColor="#8b5cf6" />
-            <stop offset="100%" stopColor="#ec4899" />
-          </linearGradient>
-        </defs>
-        <path
-          d={generatePath()}
-          stroke="url(#waveGradient)"
-          strokeWidth="3"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+    <div className="w-full h-48 flex items-center justify-center">
+      <canvas
+        id="waveform-canvas"
+        width={800}
+        height={200}
+        className="w-full h-full drop-shadow-lg"
+        style={{ filter: "drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3))" }}
+      />
     </div>
   );
 }

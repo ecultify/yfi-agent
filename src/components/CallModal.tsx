@@ -23,60 +23,33 @@ export function CallModal({
   open,
   onClose,
   assistantName,
-  transcript,
   isSpeaking,
 }: CallModalProps) {
-  const transcriptEndRef = React.useRef<HTMLDivElement>(null);
-
-  // Auto-scroll to bottom when new transcript arrives
-  React.useEffect(() => {
-    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [transcript]);
-
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-center">
+          <DialogTitle className="text-center text-2xl">
             Connected to {assistantName}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-6 flex-1 overflow-hidden">
+        <div className="flex flex-col gap-6 py-4">
           {/* Waveform Visualization */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-8 flex items-center justify-center">
+          <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-12 flex items-center justify-center">
             <Waveform isActive={isSpeaking} />
           </div>
 
-          {/* Live Transcript */}
-          <div className="flex flex-col">
-            <h3 className="text-sm font-semibold mb-2 text-gray-700">
-              Live Transcript
-            </h3>
-            <div className="h-64 border rounded-lg p-4 overflow-y-auto bg-gray-50 space-y-3">
-              {transcript.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-8">
-                  Transcript will appear here...
-                </p>
-              ) : (
-                transcript.map((item, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 rounded-lg ${
-                      item.role === "assistant"
-                        ? "bg-blue-100 text-blue-900"
-                        : "bg-gray-200 text-gray-900"
-                    }`}
-                  >
-                    <span className="font-semibold text-xs block mb-1">
-                      {item.role === "assistant" ? assistantName : "You"}
-                    </span>
-                    <span className="text-sm">{item.text}</span>
-                  </div>
-                ))
-              )}
-              <div ref={transcriptEndRef} />
-            </div>
+          {/* Status Indicator */}
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <div
+              className={`w-3 h-3 rounded-full transition-all ${
+                isSpeaking
+                  ? "bg-green-500 animate-pulse"
+                  : "bg-gray-400"
+              }`}
+            />
+            <span>{isSpeaking ? "AI is speaking..." : "Listening..."}</span>
           </div>
 
           {/* Disconnect Button */}
