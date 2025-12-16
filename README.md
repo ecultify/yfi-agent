@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YFI Voice Agent
+
+A secure Next.js application with AI voice agent integration using Vapi WebRTC.
+
+## Features
+
+- 🎨 Modern, responsive UI with Tailwind CSS
+- 🎤 Real-time voice communication with Vapi WebRTC
+- 🔒 Built with security best practices (protected against React2Shell vulnerability)
+- 🧩 shadcn/ui component library
+- ⚡ Next.js 15 with App Router
+- 📱 Mobile-friendly design
+
+## Security Measures
+
+This application is built with the following security measures to protect against the React2Shell vulnerability (CVE-2025-55182):
+
+1. **Updated Dependencies**: Uses React 19.0.0+ and Next.js 15.1.0+ which include patches for the vulnerability
+2. **Input Sanitization**: All user inputs are sanitized to prevent injection attacks
+3. **Type Safety**: TypeScript is used throughout for type-safe code
+4. **Environment Variables**: Sensitive data is stored in environment variables
+5. **CSP Ready**: Content Security Policy can be easily implemented in next.config.ts
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ installed
+- A Vapi account (sign up at https://vapi.ai)
+
+### Installation
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create a `.env.local` file based on `.env.local.example`:
+
+```bash
+cp .env.local.example .env.local
+```
+
+3. Add your Vapi credentials to `.env.local`:
+
+```env
+NEXT_PUBLIC_VAPI_API_KEY=your_vapi_api_key_here
+NEXT_PUBLIC_VAPI_ASSISTANT_ID=your_assistant_id_here
+```
+
+### Running the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+yfi-agent/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── page.tsx            # Home page with voice agent trigger
+│   │   └── globals.css         # Global styles
+│   ├── components/
+│   │   ├── ui/                 # shadcn/ui components
+│   │   │   ├── button.tsx
+│   │   │   └── dialog.tsx
+│   │   └── VoiceAgentModal.tsx # Voice agent modal component
+│   ├── hooks/
+│   │   └── useVapi.ts          # Vapi WebRTC hook
+│   └── lib/
+│       └── utils.ts            # Utility functions
+├── public/                     # Static assets
+├── .env.local.example          # Environment variables template
+└── package.json
+```
 
-## Learn More
+## Vapi Integration
 
-To learn more about Next.js, take a look at the following resources:
+The application uses the `@vapi-ai/web` SDK for WebRTC voice communication. The main integration is in:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/hooks/useVapi.ts`: Custom React hook for managing Vapi sessions
+- `src/components/VoiceAgentModal.tsx`: Modal UI for voice interactions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Key Features
 
-## Deploy on Vercel
+- **Session Management**: Start and end voice calls
+- **Mute Control**: Toggle microphone on/off
+- **Status Updates**: Real-time call status and AI speech indicators
+- **Error Handling**: Graceful error handling with user feedback
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Building for Production
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+npm start
+```
+
+## License
+
+MIT
+
+## Support
+
+For issues or questions, please open an issue on GitHub.
