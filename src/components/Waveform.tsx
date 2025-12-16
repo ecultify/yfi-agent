@@ -8,7 +8,7 @@ interface WaveformProps {
 
 export function Waveform({ isActive }: WaveformProps) {
   const [points, setPoints] = React.useState<number[]>([]);
-  const animationRef = React.useRef<number>();
+  const animationRef = React.useRef<number | undefined>(undefined);
   const phaseRef = React.useRef(0);
 
   React.useEffect(() => {
